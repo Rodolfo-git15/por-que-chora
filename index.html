@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Por que chora?">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F5F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1514" media="(prefers-color-scheme: dark)">
+<title>Por que chora?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: uma coluna de bolso (até 520px). Relógios no topo, botão de ouvir grande ao alcance do polegar, navegação fixa embaixo. */
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --surface-2:#E7EDE9; --ink:#1B2725; --muted:#566561; --line:#D5DED9;
+  --accent:#2B675E; --accent-ink:#FFFFFF; --accent-soft:#D9E9E4;
+  --moon:#D99A2B; --moon-deep:#A66E12; --moon-ink:#2A1C04; --moon-soft:#F7E8C8;
+  --sleep:#5B6CA6; --alert:#B3382A; --alert-ink:#FFFFFF; --alert-soft:#F6DCD6;
+  --shadow:rgba(20,30,28,.18);
+  --f-display:"Fredoka", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0D1514; --surface:#15201E; --surface-2:#1D2A28; --ink:#E3EAE6; --muted:#90A19C; --line:#26342F;
+    --accent:#79BFB1; --accent-ink:#0D1514; --accent-soft:#1B3430;
+    --moon:#ECB458; --moon-deep:#9B6E22; --moon-ink:#1D1404; --moon-soft:#33291A;
+    --sleep:#9CA9DB; --alert:#F07D68; --alert-ink:#1A0C09; --alert-soft:#3A1F1A;
+    --shadow:rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input{font-family:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.app{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.topo{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.topo > div{min-width:0}
+.nome{font-family:var(--f-display);font-weight:600;font-size:30px;line-height:1.05;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:anywhere}
+.idade{color:var(--muted);font-size:15px;margin-top:3px}
+
+h2{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px}
+h2.urg{color:var(--alert)}
+
+.relogios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.rel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rel .rot{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.rel .val{font-family:var(--f-display);font-weight:600;font-size:25px;font-variant-numeric:tabular-nums;line-height:1.15}
+.rel .sub{font-size:12px;color:var(--muted);line-height:1.3}
+.rel.dorme .val{color:var(--sleep)}
+.medidor{display:block;height:4px;border-radius:2px;background:var(--surface-2);margin-top:8px;overflow:hidden}
+.medidor i{display:block;height:100%;background:var(--accent);border-radius:2px}
+.medidor.quase i{background:var(--moon)}
+
+.btn-ouvir{width:100%;min-height:104px;border:0;border-radius:24px;background:var(--moon);color:var(--moon-ink);font-family:var(--f-display);font-weight:600;font-size:28px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;box-shadow:0 6px 0 var(--moon-deep);margin-bottom:6px}
+.btn-ouvir .ic{width:32px;height:32px;stroke-width:2}
+.btn-ouvir:active{transform:translateY(3px);box-shadow:0 3px 0 var(--moon-deep)}
+.sem-ouvir{display:block;margin:10px auto 0;background:transparent;border:0;color:var(--muted);font-weight:600;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px}
+
+.ouvindo{background:var(--moon-soft);border:2px solid var(--moon);border-radius:24px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.ouvindo .rot{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.cont{font-family:var(--f-display);font-weight:600;font-size:64px;line-height:1;font-variant-numeric:tabular-nums}
+#nivel{width:100%;height:76px;display:block}
+
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg strong{font-size:17px}
+.linha-btn{display:flex;flex-wrap:wrap;gap:8px}
+
+.registro{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.btn-reg{min-height:72px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--r);font-weight:600;font-size:15px;line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:8px 4px}
+.btn-reg:active{background:var(--surface-2)}
+
+.form{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.setup{margin-bottom:14px}
+.campos2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:400px){.campos2{grid-template-columns:minmax(0,1fr)}}
+.campo{display:flex;flex-direction:column;gap:5px;min-width:0}
+.campo label{font-size:13px;font-weight:600;color:var(--muted)}
+.campo input{font-size:16px;font-weight:500;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-width:0;width:100%;min-height:46px}
+.btn-pri{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer}
+.btn-sec{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-sec .ic{width:18px;height:18px}
+
+.choro{background:var(--moon-soft);border:2px solid var(--moon);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.choro-topo{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.choro .rot{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.timer{font-family:var(--f-display);font-weight:600;font-size:44px;font-variant-numeric:tabular-nums;line-height:1}
+.selos{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.selo{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--surface);color:var(--ink)}
+.selo.forte{background:var(--accent);color:var(--accent-ink)}
+.selo.hist{background:var(--accent-soft);color:var(--accent)}
+.ouvi{display:flex;flex-wrap:wrap;gap:6px}
+.ouvi span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--moon);color:var(--ink);font-variant-numeric:tabular-nums}
+.aviso{display:block;background:var(--alert);color:var(--alert-ink);border-radius:12px;padding:11px 14px;font-weight:700;text-decoration:none}
+.causas{display:flex;flex-direction:column;gap:8px}
+.causa{background:var(--surface);border-radius:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 10px;padding:10px 10px 10px 12px}
+.causa-info{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0;text-align:left;color:inherit;font:inherit;border-radius:8px}
+.causa-info:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.causa-nome{font-weight:700;font-size:16px}
+.causa.top{padding:14px 12px 14px 14px}
+.causa.top .causa-nome{font-family:var(--f-display);font-size:24px;font-weight:600;line-height:1.1}
+.barra{display:block;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.barra i{display:block;height:100%;background:var(--moon);border-radius:3px}
+.causa.top .barra{height:9px}
+.causa-acao{font-size:15px;font-weight:500}
+.motivos{display:flex;flex-wrap:wrap;gap:4px}
+.motivo{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);font-weight:600}
+.motivo.tent{background:var(--accent-soft);color:var(--accent)}
+.btn-res{border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:14px;border-radius:999px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+.causa.top .btn-res{background:var(--accent);color:var(--accent-ink);padding:12px 16px;font-size:15px}
+.sinais{grid-column:1 / -1;margin:2px 0 0;padding:8px 0 0;border-top:1px dashed var(--line);list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.sinais li{font-size:13px;padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.choro-acoes{display:flex;flex-wrap:wrap;gap:8px}
+.btn-alerta{color:var(--alert);border-color:var(--alert)}
+
+.dia-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.dia-nav strong{font-family:var(--f-display);font-weight:600;font-size:23px;text-transform:capitalize}
+.dia-nav button{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
+.resumo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:380px){.resumo{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.resumo > div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.resumo b{font-family:var(--f-display);font-weight:600;font-size:23px;font-variant-numeric:tabular-nums;line-height:1.15}
+.resumo span{font-size:12px;color:var(--muted);font-weight:600}
+.resumo small{font-size:11px;color:var(--muted)}
+.linhas{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.linha{display:grid;grid-template-columns:auto 10px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px 6px 6px 8px;border-top:1px solid var(--line);min-height:52px}
+.linha:first-child{border-top:0}
+.hora{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ink);padding:6px 4px;width:5.8em;min-width:0}
+.ponto{width:10px;height:10px;border-radius:50%}
+.t-mamada{background:var(--accent)}
+.t-dormiu,.t-acordou{background:var(--sleep)}
+.t-fralda{background:var(--muted)}
+.t-choro{background:var(--moon)}
+.txt{font-size:15px;overflow-wrap:anywhere}
+.x{width:40px;height:40px;border:0;background:transparent;color:var(--muted);font-size:22px;border-radius:10px;cursor:pointer}
+.conf{display:flex;gap:6px}
+.conf button{border:0;border-radius:999px;padding:8px 12px;font-weight:700;font-size:13px;cursor:pointer}
+.conf .sim{background:var(--alert);color:var(--alert-ink)}
+.conf .nao{background:var(--surface-2);color:var(--ink)}
+.vazio-txt{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:18px;text-align:center;color:var(--muted)}
+
+.pad{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:18px}
+.sub-t{font-size:13px;font-weight:700;margin-bottom:8px}
+.bls{display:flex;flex-direction:column;gap:8px}
+.bl{display:grid;grid-template-columns:minmax(0,8.5em) minmax(0,1fr) 2em;align-items:center;gap:10px;font-size:14px}
+.bl b{text-align:right;font-variant-numeric:tabular-nums}
+.h-grid{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:2px;height:38px}
+.h-grid span{background:var(--surface-2);border-radius:3px;position:relative;overflow:hidden}
+.h-grid span i{position:absolute;inset:0;background:var(--moon)}
+.h-eixo{position:relative;height:16px;margin-top:5px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.h-eixo span{position:absolute;top:0;transform:translateX(-50%)}
+.h-eixo span:first-child{transform:none}
+.h-eixo span:last-child{transform:translateX(-100%)}
+
+.flags{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.flags li{padding:11px 14px;border-top:1px solid var(--line);display:flex;gap:11px;align-items:flex-start;font-size:15px}
+.flags li:first-child{border-top:0}
+.flags li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--moon)}
+.flags.urg{border:1.5px solid var(--alert)}
+.flags.urg li::before{background:var(--alert)}
+.flags.calma li::before{background:var(--accent)}
+.fones{display:flex;flex-direction:column;gap:8px}
+.fone{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-height:58px;color:var(--ink);text-decoration:none}
+.fone-n{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.num{font-family:var(--f-display);font-weight:600;font-size:23px;color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
+.link{color:var(--accent);font-weight:700}
+
+.info{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-top:8px;font-size:15px}
+.info span{color:var(--muted);font-weight:600}
+.info b{font-variant-numeric:tabular-nums}
+
+.toast{position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:30;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.toast-in{max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 28px var(--shadow);pointer-events:auto}
+.toast-l{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:600}
+.toast .desf{background:transparent;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 2px;font-size:15px}
+.toast-chips{display:flex;flex-wrap:wrap;gap:8px}
+.toast-chips button{border:1.5px solid currentColor;background:transparent;color:inherit;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;cursor:pointer}
+.toast-chips button.on{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.nav-in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;color:var(--muted);text-decoration:none;font-size:12px;font-weight:600}
+.nav a[aria-current="page"]{color:var(--accent)}
+.nav a.al[aria-current="page"]{color:var(--alert)}
+
+@media (prefers-reduced-motion: no-preference){
+  .barra i,.medidor i{transition:width .4s ease}
+  .toast-in{animation:sobe .22s ease-out}
+  @keyframes sobe{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topo" id="topo"><div><div class="nome">Bebê</div></div></header>
+  <main>
+    <section id="v-agora" class="view" aria-label="Agora"></section>
+    <section id="v-dia" class="view" aria-label="Dia" hidden></section>
+    <section id="v-alerta" class="view" aria-label="Sinais de alerta" hidden></section>
+    <section id="v-bebe" class="view" aria-label="Bebê" hidden></section>
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<nav class="nav" aria-label="Seções">
+  <div class="nav-in">
+    <a href="#agora" data-v="agora"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Agora</span></a>
+    <a href="#dia" data-v="dia"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg><span>Dia</span></a>
+    <a href="#alerta" data-v="alerta" class="al"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2v.1"/></svg><span>Alerta</span></a>
+    <a href="#bebe" data-v="bebe"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M9.2 12h.01M14.8 12h.01M9.8 16a3 3 0 0 0 4.4 0"/><path d="M12 5c-.8-1.6.4-2.8 1.8-2.3"/></svg><span>Bebê</span></a>
+  </div>
+</nav>
+
+<script id="analise">
+/* Análise do som: funções puras, sem tela. */
+(function(g){
+'use strict';
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function ramp(x,a,b){return clamp((x-a)/(b-a),0,1)}
+function bell(x,c,w){return Math.exp(-.5*Math.pow((x-c)/w,2))}
+function avg(a){if(!a.length) return 0;let s=0;for(const v of a) s+=v;return s/a.length}
+function pct(sorted,p){return sorted[Math.min(sorted.length-1,Math.max(0,Math.floor(p*(sorted.length-1))))]}
+
+/* um quadro de ~85 ms: volume, tom (autocorrelação) e quanto da energia está acima de 2 kHz */
+function quadro(buf,fr,sr,t){
+  let s=0; for(let i=0;i<buf.length;i++) s+=buf[i]*buf[i];
+  const db=10*Math.log10(s/buf.length+1e-12);
+  let f0=0,clar=0;
+  if(db>-62){
+    const D=Math.max(1,Math.round(sr/22050)),sd=sr/D,M=Math.floor(buf.length/D);
+    const x=new Float32Array(M);
+    for(let i=0;i<M;i++){let a=0;for(let j=0;j<D;j++) a+=buf[i*D+j];x[i]=a/D}
+    const minL=Math.max(2,Math.floor(sd/1150)),maxL=Math.ceil(sd/220),N=M-maxL-1;
+    const r=new Float32Array(maxL+2);
+    for(let L=minL;L<=maxL;L++){
+      let c=0,e1=0,e2=0;
+      for(let i=0;i<N;i++){const a=x[i],b=x[i+L];c+=a*b;e1+=a*a;e2+=b*b}
+      r[L]=c/Math.sqrt(e1*e2+1e-20);
+    }
+    /* só picos de verdade: um sinal grave (voz de adulto) sobe na borda e não forma pico */
+    let best=0;
+    for(let L=minL+1;L<maxL;L++) if(r[L]>r[L-1]&&r[L]>=r[L+1]&&r[L]>best) best=r[L];
+    if(best>=.45){
+      for(let L=minL+1;L<maxL;L++){ if(r[L]>r[L-1]&&r[L]>=r[L+1]&&r[L]>=.86*best){f0=sd/L;clar=r[L];break} }
+    }
+  }
+  let hr=0;
+  if(fr&&fr.length){
+    const bin=sr/(fr.length*2); let lo=0,hi=0;
+    for(let k=Math.max(1,Math.floor(100/bin));k<fr.length&&k*bin<8000;k++){
+      const v=Math.pow(10,fr[k]/10); if(!isFinite(v)) continue;
+      if(k*bin>=2000) hi+=v; else lo+=v;
+    }
+    hr=hi/(hi+lo+1e-20);
+  }
+  return {t,db,f0,clar,hr};
+}
+
+/* resume os quadros de uma escuta em medidas do choro */
+function extrair(q){
+  if(!q||q.length<20) return {ok:false,motivo:'baixo'};
+  const dbs=q.map(x=>x.db).sort((a,b)=>a-b);
+  const top=pct(dbs,.9);
+  if(top<-50) return {ok:false,motivo:'baixo'};
+  const lim=Math.max(top-18,-56);
+  const act=q.map(x=>x.db>lim);
+  const ativos=q.filter((x,i)=>act[i]);
+  if(ativos.length<q.length*.12) return {ok:false,motivo:'baixo'};
+  const voz=ativos.filter(x=>x.f0>0);
+  if(voz.length<5||voz.length<ativos.length*.2) return {ok:false,motivo:'nao'};
+  const f0s=voz.map(x=>x.f0).sort((a,b)=>a-b);
+  const f0Med=pct(f0s,.5);
+  if(f0Med<260) return {ok:false,motivo:'nao'};
+  const m=avg(f0s),sdv=Math.sqrt(avg(f0s.map(v=>(v-m)*(v-m))));
+  const dt=Math.max(.02,(q[q.length-1].t-q[0].t)/(q.length-1)/1000);
+  const bursts=[],pausas=[]; let run=0,gap=0;
+  for(let i=0;i<act.length;i++){
+    if(act[i]){
+      if(gap>0){ if(gap>=2){bursts.push(run*dt);pausas.push(gap*dt);run=0} else run+=gap; gap=0 }
+      run++;
+    } else if(run>0) gap++;
+  }
+  if(run>0) bursts.push(run*dt);
+  const bm=avg(bursts);
+  const bcv=bursts.length>1?Math.sqrt(avg(bursts.map(b=>(b-bm)*(b-bm))))/bm:.5;
+  const r3=v=>Math.round(v*1000)/1000;
+  return {ok:true,
+    f0Med:Math.round(f0Med),f0P90:Math.round(pct(f0s,.9)),f0CV:r3(sdv/m),
+    hiPitch:r3(voz.filter(x=>x.f0>750).length/voz.length),
+    nivel:Math.round(top*10)/10,
+    harsh:r3(avg(ativos.map(x=>x.hr))),
+    voiced:r3(voz.length/ativos.length),
+    burstMean:Math.round(bm*100)/100,burstCV:r3(bcv),
+    pauseMean:Math.round((pausas.length?avg(pausas):0)*100)/100,
+    ativo:r3(ativos.length/q.length),nBursts:bursts.length};
+}
+
+/* padrões gerais do choro (literatura): ponto de partida antes de aprender com o bebê */
+function acustica(F,ordem){
+  const I=ramp(F.nivel,-42,-15);
+  const dor=avg([ramp(F.f0Med,450,650),ramp(F.hiPitch,.05,.3),I,ramp(F.harsh,.2,.5),ramp(F.burstMean,1,2.5),ramp(F.ativo,.6,.9)]);
+  const p={};
+  p.colica=dor;
+  p.fome=avg([1-ramp(F.burstCV,.3,.8),bell(F.f0Med,460,120),bell(I,.6,.25),bell(F.burstMean,1.1,.6),bell(F.ativo,.65,.2)]);
+  p.sono=avg([1-I,1-ramp(F.ativo,.3,.7),ramp(F.burstCV,.4,1),1-ramp(F.f0Med,400,600)]);
+  const desc=avg([bell(I,.45,.2),ramp(F.voiced,.5,.85),bell(F.ativo,.55,.25),1-ramp(F.hiPitch,.05,.25)]);
+  p.fralda=desc*.9; p.temperatura=desc*.7;
+  p.arroto=.5*dor+.15;
+  p.colo=.5*p.sono+.5*(1-ramp(F.ativo,.4,.8));
+  let s=0; ordem.forEach(k=>{p[k]=Math.pow(p[k],2);s+=p[k]}); ordem.forEach(k=>p[k]/=s||1);
+  return {p,dor:F.hiPitch>.3&&I>.7&&F.f0Med>550};
+}
+
+function chipsAc(F){
+  const I=ramp(F.nivel,-42,-15);
+  return ['Tom '+F.f0Med+' Hz',
+    I>.75?'Muito forte':I>.45?'Forte':'Fraco',
+    F.burstCV<.4?'Ritmo regular':F.burstCV>.8?'Ritmo irregular':'Ritmo médio',
+    F.ativo>.8?'Contínuo':F.ativo<.45?'Intermitente':'',
+    F.hiPitch>.2?'Picos agudos':''].filter(Boolean);
+}
+
+g.Analise={quadro,extrair,acustica,chipsAc,clamp,ramp,bell,avg};
+})(typeof window!=='undefined'?window:this);
+</script>
+
+<script>
+(function(){
+'use strict';
+const AN=window.Analise, clamp=AN.clamp, ramp=AN.ramp;
+const MIN=60000,HORA=3600000,DIA=86400000;
+const VIEWS=['agora','dia','alerta','bebe'];
+const LS_EV='pqc.eventos',LS_PF='pqc.perfil';
+const OUVIR_MS=8000;
+
+const CAUSAS={
+  fome:{nome:'Fome',acao:'Ofereça o peito ou a mamadeira',sinais:['Leva a mão à boca','Vira a cabeça procurando','Estala os lábios','Choro que cresce aos poucos'],evento:'mamada'},
+  sono:{nome:'Sono',acao:'Escureça, enrole e nine com shhh',sinais:['Esfrega os olhos','Boceja','Olhar parado','Vira o rosto','Choro manhoso'],evento:'dormiu'},
+  fralda:{nome:'Fralda',acao:'Troque a fralda',sinais:['Se contorce','Força ou faz cocô','Assadura'],evento:'fralda'},
+  arroto:{nome:'Arroto',acao:'Em pé no ombro, tapinhas nas costas',sinais:['Logo depois de mamar','Arqueia as costas','Solta o peito chorando']},
+  colica:{nome:'Cólica ou gases',acao:'Bicicletinha e massagem na barriga',sinais:['Encolhe as pernas','Punhos fechados','Rosto vermelho','Barriga dura','Fim de tarde']},
+  colo:{nome:'Colo',acao:'Pele a pele, balanço e shhh',sinais:['Para quando pega no colo','Choro que vem e vai','Procura contato']},
+  temperatura:{nome:'Calor, frio ou incômodo',acao:'Sinta a nuca e confira a roupa',sinais:['Nuca suada ou gelada','Etiqueta ou costura','Fio de cabelo enrolado no dedinho']}
+};
+const ORDEM=Object.keys(CAUSAS);
+const FINAIS={sozinho:'Parou sozinho'};
+const DETS={mamada:{E:'Esq.',D:'Dir.',M:'Mamadeira'},fralda:{xixi:'Xixi',coco:'Cocô',ambos:'Os dois'}};
+const DET_LONGO={mamada:{E:'peito esq.',D:'peito dir.',M:'mamadeira'},fralda:{xixi:'xixi',coco:'cocô',ambos:'xixi e cocô'}};
+const TOAST_MSG={mamada:'Mamada registrada',fralda:'Fralda registrada',dormiu:'Dormiu',acordou:'Acordou'};
+const ESC_AC={f0Med:100,f0CV:.1,hiPitch:.12,nivel:6,harsh:.12,burstMean:.6,burstCV:.25,ativo:.15};
+
+const URG=['Febre de 37,5 °C ou mais na axila, antes dos 3 meses','Temperatura abaixo de 35,5 °C','Respiração difícil ou lábios arroxeados','Molinho ou difícil de acordar','Moleira estufada','Vômito verde, com sangue ou em jato repetido','Queda ou batida na cabeça'];
+const PED=['Choro sem consolo por mais de 2 h','Choro muito agudo, fraco ou gemido diferente do normal','Febre a partir dos 3 meses','Recusa várias mamadas seguidas','Menos de 6 fraldas molhadas no dia, depois do 5º dia','Sangue no cocô','Pele ou olhos cada vez mais amarelos'];
+const LIMITE=['Deixe o bebê no berço, de barriga para cima, e saia do quarto por 5 minutos','Peça para o outro assumir','Nunca sacuda o bebê'];
+
+const svg=p=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+const IC={
+  mamada:svg('<path d="M9.5 2.5h5"/><path d="M10.5 2.5v3L8 9v10.5A2.5 2.5 0 0 0 10.5 22h3a2.5 2.5 0 0 0 2.5-2.5V9l-2.5-3.5v-3"/><path d="M8 13h8"/>'),
+  lua:svg('<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 6.8 6.8 0 0 0 20 14.5z"/>'),
+  sol:svg('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>'),
+  fralda:svg('<path d="M3 6.5h18V10a9 9 0 0 1-18 0z"/><path d="M7.5 6.5v3M16.5 6.5v3"/>'),
+  mic:svg('<rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>')
+};
+
+const S={eventos:[],perfil:{},view:'agora',diaOff:0,aberto:null,toast:null,confirmar:null,perfilSujo:false,pend:false,fase:'pronto',msg:''};
+const A={ctx:null,stream:null,an:null,buf:null,fr:null,quadros:[],t0:0,iv:null,cor:'#D99A2B'};
+let timerToast=null,seg=0;
+
+const $=s=>document.querySelector(s);
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rnd(v){return v==null?null:Math.round(v)}
+function novoId(){return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function p2(n){return String(n).padStart(2,'0')}
+function hhmm(ms){const d=new Date(ms);return p2(d.getHours())+':'+p2(d.getMinutes())}
+function dur(min){
+  if(min==null) return '—';
+  if(min<1) return '<1 min';
+  min=Math.round(min);
+  if(min>=1440) return Math.floor(min/1440)+'d '+Math.floor(min%1440/60)+'h';
+  if(min<60) return min+' min';
+  return Math.floor(min/60)+'h'+p2(min%60);
+}
+function relogio(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return h?h+':'+p2(m)+':'+p2(ss):p2(m)+':'+p2(ss)}
+function inicioDia(ms){const d=new Date(ms);d.setHours(0,0,0,0);return d.getTime()}
+function diaRef(off){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+off);return d.getTime()}
+function fimDia(ini){const d=new Date(ini);d.setDate(d.getDate()+1);return d.getTime()}
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function ordenar(){S.eventos.sort((a,b)=>b.em-a.em)}
+function nomeRes(k){return CAUSAS[k]?CAUSAS[k].nome:(FINAIS[k]||'')}
+
+/* idade */
+function nascimentoMs(){
+  const n=S.perfil.nascimento;
+  if(!n||!/^\d{4}-\d{2}-\d{2}$/.test(n)) return null;
+  const [y,m,d]=n.split('-').map(Number);
+  return new Date(y,m-1,d).getTime();
+}
+function semanas(now){const n=nascimentoMs();return n==null?null:(now-n)/(7*DIA)}
+function idadeTexto(now){
+  const n=nascimentoMs(); if(n==null) return '';
+  const dias=Math.round((inicioDia(now)-n)/DIA);
+  const pl=(v,a,b)=>v+' '+(v===1?a:b);
+  if(dias<0) return 'Faltam '+pl(-dias,'dia','dias');
+  if(dias===0) return 'Nasceu hoje';
+  if(dias<7) return pl(dias,'dia','dias');
+  if(dias<60){const w=Math.floor(dias/7),r=dias%7;return pl(w,'semana','semanas')+(r?' e '+pl(r,'dia','dias'):'')}
+  const b=new Date(n),h=new Date(now);
+  let meses=(h.getFullYear()-b.getFullYear())*12+(h.getMonth()-b.getMonth());
+  if(h.getDate()<b.getDate()) meses--;
+  if(meses<12){
+    const ref=new Date(b.getFullYear(),b.getMonth()+meses,b.getDate());
+    const rd=Math.round((inicioDia(now)-ref.getTime())/DIA);
+    return pl(meses,'mês','meses')+(rd>0?' e '+pl(rd,'dia','dias'):'');
+  }
+  const anos=Math.floor(meses/12),mm=meses%12;
+  return pl(anos,'ano','anos')+(mm?' e '+pl(mm,'mês','meses'):'');
+}
+function faixa(sem){
+  const s=sem==null?4:Math.max(0,sem);
+  const T=[[2,[60,150],[30,50]],[6,[80,170],[40,70]],[12,[100,190],[60,90]],[17,[130,220],[75,120]],
+           [26,[150,240],[100,150]],[39,[180,270],[130,180]],[52,[180,300],[150,240]],[Infinity,[180,300],[180,300]]];
+  for(const [lim,feed,wake] of T) if(s<lim) return {feed,wake};
+  return {feed:[180,300],wake:[180,300]};
+}
+function colicaIdade(sem){
+  if(sem==null) return .6;
+  if(sem<1) return .15; if(sem<2) return .5; if(sem<3) return .8;
+  if(sem<=8) return 1; if(sem<=12) return .7; if(sem<=16) return .4; return .15;
+}
+
+/* contexto do registro */
+function ultimos(now){
+  let mam=null,fr=null,son=null;
+  for(const e of S.eventos){
+    if(e.em>now) continue;
+    if(!mam&&e.tipo==='mamada') mam=e;
+    if(!fr&&e.tipo==='fralda') fr=e;
+    if(!son&&(e.tipo==='dormiu'||e.tipo==='acordou')) son=e;
+    if(mam&&fr&&son) break;
+  }
+  return {mam,fr,son};
+}
+function contexto(now){
+  const u=ultimos(now);
+  const m=x=>x?(now-x.em)/MIN:null;
+  const ok=v=>v!=null&&v<=480?v:null;
+  const d=new Date(now);
+  const ctx={tFeed:ok(m(u.mam)),tFr:ok(m(u.fr)),dormindo:false,tAwake:null,tSleep:null,hora:d.getHours()+d.getMinutes()/60};
+  if(u.son){
+    const t=m(u.son);
+    if(u.son.tipo==='dormiu'){if(t<=720){ctx.dormindo=true;ctx.tSleep=t}}
+    else ctx.tAwake=ok(t);
+  }
+  return ctx;
+}
+function choroAtivo(now){
+  now=now||Date.now();
+  return S.eventos.find(e=>e.tipo==='choro'&&!e.fim&&now-e.em<3*HORA&&e.em<=now+MIN)||null;
+}
+
+/* aprendizado com os choros já resolvidos */
+function pessoal(ctx,ac,excluir,now){
+  const hist=S.eventos.filter(e=>e.tipo==='choro'&&CAUSAS[e.resolveu]&&e.ctx&&e.id!==excluir&&now-e.em<45*DIA);
+  const r={p:{},alpha:0,n:hist.length};
+  if(hist.length<3) return r;
+  let W=0;
+  for(const h of hist){
+    const c=h.ctx; let d=0,n=0;
+    const add=(a,b,e,w)=>{w=w||1;if(a==null&&b==null) return;n+=w;d+=w*((a==null||b==null)?1:Math.min(9,Math.pow((a-b)/e,2)))};
+    add(ctx.tFeed,c.tFeed,50);
+    add(ctx.dormindo?null:ctx.tAwake,c.dormindo?null:c.tAwake,40);
+    add(ctx.tFr,c.tFr,90);
+    const dh=Math.abs(ctx.hora-(c.hora||0)),hd=Math.min(dh,24-dh); n++; d+=Math.pow(hd/3,2);
+    n++; if(!!ctx.dormindo!==!!c.dormindo) d+=1;
+    if(ac&&h.ac) for(const k in ESC_AC) if(ac[k]!=null&&h.ac[k]!=null) add(ac[k],h.ac[k],ESC_AC[k],1.5);
+    const w=Math.exp(-d/Math.max(1,n));
+    r.p[h.resolveu]=(r.p[h.resolveu]||0)+w; W+=w;
+  }
+  if(W<1e-6) return r;
+  for(const k in r.p) r.p[k]/=W;
+  r.alpha=Math.min(.75,W/(W+1.5))*Math.min(1,hist.length/6);
+  return r;
+}
+
+/* pontuação: contexto + som + histórico */
+function pontuar(ctx,sem,choro,now){
+  const f=faixa(sem),s={},mot={};
+  ORDEM.forEach(k=>mot[k]=[]);
+  if(ctx.tFeed==null){s.fome=.45;mot.fome.push('Sem mamada recente')}
+  else{s.fome=.08+.92*ramp(ctx.tFeed,f.feed[0]*.5,f.feed[1]);mot.fome.push('Mamou há '+dur(ctx.tFeed))}
+  if(ctx.dormindo){s.sono=ctx.tSleep<45?.7:.3;mot.sono.push('Dormiu há '+dur(ctx.tSleep))}
+  else if(ctx.tAwake==null){s.sono=.35}
+  else{s.sono=.08+.92*ramp(ctx.tAwake,f.wake[0]*.6,f.wake[1]);mot.sono.push('Acordado há '+dur(ctx.tAwake))}
+  if(ctx.tFr==null){s.fralda=.35;mot.fralda.push('Sem troca recente')}
+  else{s.fralda=.05+.7*ramp(ctx.tFr,30,180);mot.fralda.push('Trocou há '+dur(ctx.tFr))}
+  if(ctx.tFeed!=null&&ctx.tFeed>10&&ctx.tFeed<60) s.fralda+=.08;
+  if(ctx.tFeed!=null&&ctx.tFeed<45){s.arroto=.1+.65*(1-ctx.tFeed/45);mot.arroto.push('Mamou há '+dur(ctx.tFeed))}
+  else s.arroto=.05;
+  const tarde=ctx.hora>=17||ctx.hora<1;
+  s.colica=colicaIdade(sem)*(tarde?.55:.25);
+  if(tarde) mot.colica.push('Fim do dia');
+  if(choro){const d=(now-choro.em)/MIN;if(d>20){s.colica+=Math.min(.25,(d-20)/120);mot.colica.push('Choro longo')}}
+  s.colo=Math.max(s.fome,s.sono,s.fralda,s.arroto)<.4?.45:.25;
+  s.temperatura=.12;
+  const tent={};
+  if(choro){for(const e of S.eventos){if(e.em>=choro.em&&e.em<=now&&e.id!==choro.id){
+    if(e.tipo==='mamada') tent.fome=1;
+    if(e.tipo==='fralda') tent.fralda=1;
+    if(e.tipo==='dormiu') tent.sono=1;
+  }}}
+  let soma=0; ORDEM.forEach(k=>soma+=s[k]);
+  const p={}; ORDEM.forEach(k=>p[k]=s[k]/soma);
+  const ac=choro&&choro.ac?AN.acustica(choro.ac,ORDEM):null;
+  if(ac){
+    const temCtx=ctx.tFeed!=null||ctx.tAwake!=null||ctx.tFr!=null||ctx.dormindo;
+    const wA=temCtx?.45:.75;
+    ORDEM.forEach(k=>p[k]=(1-wA)*p[k]+wA*ac.p[k]);
+  }
+  const pess=pessoal(ctx,choro?choro.ac:null,choro?choro.id:null,now);
+  if(pess.alpha>0) ORDEM.forEach(k=>p[k]=(1-pess.alpha)*p[k]+pess.alpha*(pess.p[k]||0));
+  const lista=ORDEM.map(k=>({k,p:p[k],mot:mot[k],tent:!!tent[k]})).sort((a,b)=>b.p-a.p);
+  const margem=lista[0].p-lista[1].p;
+  const conf=lista[0].p>=.3&&margem>=.1?'forte':margem>=.04?'médio':'fraco';
+  return {lista,pess,ac,conf};
+}
+
+/* registro local (neste celular) */
+function salvar(){const lim=Date.now()-90*DIA;S.eventos=S.eventos.filter(e=>e.em>lim);lsSet(LS_EV,S.eventos)}
+function gravar(ev){S.eventos=S.eventos.filter(e=>e.id!==ev.id);S.eventos.push(ev);ordenar();salvar();renderAll()}
+function atualizar(id,patch){const e=S.eventos.find(x=>x.id===id);if(e){Object.assign(e,patch);ordenar();salvar();renderAll()}}
+function excluir(id){S.eventos=S.eventos.filter(e=>e.id!==id);salvar();renderAll()}
+function salvarPerfil(p){S.perfil=Object.assign({},S.perfil,p);lsSet(LS_PF,S.perfil);renderAll()}
+
+/* microfone */
+async function ouvir(){
+  if(S.fase==='ouvindo') return;
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){S.fase='erro';S.msg='Este navegador não libera o microfone';renderView('agora');return}
+  let ctx;
+  try{ctx=new AC()}catch(e){S.fase='erro';S.msg='Microfone indisponível';renderView('agora');return}
+  try{ctx.resume()}catch(e){}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+  catch(e){
+    try{ctx.close()}catch(_){}
+    S.fase='erro';
+    S.msg=(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))?'Microfone bloqueado. Libere em aA › Ajustes do Site › Microfone.':'Microfone indisponível';
+    renderView('agora');return;
+  }
+  if(ctx.state==='suspended'){try{await ctx.resume()}catch(e){}}
+  const src=ctx.createMediaStreamSource(stream);
+  const an=ctx.createAnalyser(); an.fftSize=4096; an.smoothingTimeConstant=0;
+  src.connect(an);
+  A.ctx=ctx;A.stream=stream;A.an=an;A.buf=new Float32Array(an.fftSize);A.fr=new Float32Array(an.frequencyBinCount);A.quadros=[];A.t0=performance.now();
+  try{A.cor=getComputedStyle(document.documentElement).getPropertyValue('--moon').trim()||A.cor}catch(e){}
+  S.fase='ouvindo'; S.msg=''; renderView('agora');
+  A.iv=setInterval(capturar,50);
+}
+function capturar(){
+  if(!A.an) return;
+  const t=performance.now()-A.t0;
+  try{
+    A.an.getFloatTimeDomainData(A.buf);
+    A.an.getFloatFrequencyData(A.fr);
+    A.quadros.push(AN.quadro(A.buf,A.fr,A.ctx.sampleRate,t));
+  }catch(e){}
+  desenharNivel();
+  const el=$('#cont'); if(el) el.textContent=String(Math.max(0,Math.ceil((OUVIR_MS-t)/1000)));
+  if(t>=OUVIR_MS) terminarOuvir(false);
+}
+function pararMic(){
+  clearInterval(A.iv);A.iv=null;
+  try{A.stream.getTracks().forEach(t=>t.stop())}catch(e){}
+  try{A.ctx.close()}catch(e){}
+  A.an=null;A.ctx=null;A.stream=null;
+}
+function terminarOuvir(cancelado){
+  if(S.fase!=='ouvindo') return;
+  const t=performance.now()-A.t0;
+  pararMic();
+  const qs=A.quadros; A.quadros=[];
+  if(cancelado||t<2500){S.fase='pronto';renderView('agora');return}
+  const F=AN.extrair(qs);
+  if(!F.ok){
+    S.fase='naoouvi';
+    S.msg=F.motivo==='baixo'?'Não ouvi choro. Chegue o celular mais perto.':'Não parece choro de bebê.';
+    renderView('agora');return;
+  }
+  S.fase='pronto';
+  registrarChoro(F);
+}
+function desenharNivel(){
+  const cv=$('#nivel'); if(!cv) return;
+  const w=cv.clientWidth,h=cv.clientHeight,dpr=window.devicePixelRatio||1;
+  if(!w||!h) return;
+  if(cv.width!==Math.round(w*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+  const n=48,qs=A.quadros.slice(-n),bw=w/n;
+  g.fillStyle=A.cor;
+  qs.forEach((q,i)=>{const v=clamp((q.db+62)/52,.04,1),bh=v*h;g.fillRect(i*bw+1,(h-bh)/2,Math.max(1,bw-2),bh)});
+}
+function registrarChoro(F){
+  const now=Date.now(),ativo=choroAtivo(now);
+  S.aberto=null;
+  if(ativo){ if(F) atualizar(ativo.id,{ac:F}); else renderAll(); return }
+  const ctx=contexto(now);
+  gravar({id:novoId(),tipo:'choro',em:now,
+    ctx:{tFeed:rnd(ctx.tFeed),tAwake:rnd(ctx.tAwake),tFr:rnd(ctx.tFr),tSleep:rnd(ctx.tSleep),dormindo:ctx.dormindo,hora:Math.round(ctx.hora*100)/100},
+    ac:F||null});
+}
+
+/* ações */
+function resolver(k){
+  const ch=choroAtivo(); if(!ch) return;
+  const now=Date.now();
+  atualizar(ch.id,{resolveu:k,fim:now});
+  S.aberto=null;
+  const C=CAUSAS[k]; let novo=null;
+  if(C&&C.evento){
+    const ja=S.eventos.some(e=>e.tipo===C.evento&&e.em>=ch.em&&e.id!==ch.id);
+    const jaDorme=C.evento==='dormiu'&&contexto(now).dormindo;
+    if(!ja&&!jaDorme){novo={id:novoId(),tipo:C.evento,em:now};gravar(novo)}
+  }
+  const nid=novo?novo.id:null;
+  mostrarToast({id:nid,msg:'Resolvido: '+nomeRes(k),undo:()=>{if(nid) excluir(nid);atualizar(ch.id,{resolveu:null,fim:null})}});
+}
+function cancelarChoro(){
+  const ch=choroAtivo(); if(!ch) return;
+  const copia=JSON.parse(JSON.stringify(ch));
+  excluir(ch.id);
+  mostrarToast({msg:'Choro cancelado',undo:()=>gravar(copia)});
+}
+function registrar(t){
+  const now=Date.now();
+  const tipo=t==='sono'?(contexto(now).dormindo?'acordou':'dormiu'):t;
+  const ev={id:novoId(),tipo,em:now};
+  gravar(ev);
+  mostrarToast({id:ev.id,msg:TOAST_MSG[tipo],undo:()=>excluir(ev.id)});
+}
+function definirDet(id,v){
+  const ev=S.eventos.find(x=>x.id===id); if(!ev) return;
+  atualizar(id,{det:ev.det===v?null:v});
+  renderToast();
+  if(S.toast){clearTimeout(timerToast);timerToast=setTimeout(fecharToast,3500)}
+}
+
+/* toast */
+function mostrarToast(t){S.toast=t;renderToast();clearTimeout(timerToast);timerToast=setTimeout(fecharToast,9000)}
+function fecharToast(){S.toast=null;renderToast()}
+function renderToast(){
+  const el=$('#toast'),t=S.toast;
+  if(!t){el.hidden=true;el.innerHTML='';return}
+  const ev=t.id?S.eventos.find(e=>e.id===t.id):null;
+  let chips='';
+  if(ev&&DETS[ev.tipo]){
+    chips='<div class="toast-chips">'+Object.entries(DETS[ev.tipo]).map(([v,l])=>
+      '<button type="button" data-a="det" data-id="'+ev.id+'" data-v="'+v+'" class="'+(ev.det===v?'on':'')+'" aria-pressed="'+(ev.det===v)+'">'+l+'</button>').join('')+'</div>';
+  }
+  el.innerHTML='<div class="toast-in"><div class="toast-l"><span>'+esc(t.msg||'Registrado')+'</span>'+
+    (t.undo?'<button type="button" class="desf" data-a="desfazer">Desfazer</button>':'')+'</div>'+chips+'</div>';
+  el.hidden=false;
+}
+
+/* telas */
+function podeRender(el){const a=document.activeElement;return !(a&&el.contains(a)&&a.matches('input,select,textarea'))}
+function renderAll(){renderTopo();renderView(S.view);renderNav();renderToast()}
+function renderNav(){document.querySelectorAll('.nav a').forEach(a=>{if(a.dataset.v===S.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
+function renderView(v){
+  const el=document.getElementById('v-'+v); if(!el) return;
+  if(!podeRender(el)){S.pend=true;return}
+  if(v==='bebe'&&S.perfilSujo) return;
+  el.innerHTML=({agora:htmlAgora,dia:htmlDia,alerta:htmlAlerta,bebe:htmlBebe})[v]();
+  if(v==='agora'&&S.fase==='ouvindo') desenharNivel();
+}
+function renderTopo(){
+  const now=Date.now(),nome=S.perfil.nome||'Bebê',id=idadeTexto(now);
+  $('#topo').innerHTML='<div><div class="nome">'+esc(nome)+'</div>'+(id?'<div class="idade">'+esc(id)+'</div>':'')+'</div>';
+}
+function htmlRelogios(now){
+  const f=faixa(semanas(now)),u=ultimos(now);
+  const tM=u.mam?(now-u.mam.em)/MIN:null,tF=u.fr?(now-u.fr.em)/MIN:null,tS=u.son?(now-u.son.em)/MIN:null;
+  const med=(t,lo,hi)=>t==null?'':'<span class="medidor'+(t>=lo?' quase':'')+'" aria-hidden="true"><i style="width:'+Math.round(clamp(t/hi,0,1)*100)+'%"></i></span>';
+  const lado=u.mam&&u.mam.det&&DETS.mamada[u.mam.det];
+  const frd=u.fr&&u.fr.det&&DETS.fralda[u.fr.det];
+  let rotS='Sono',valS='—',subS='Sem registro',medS='',clsS='';
+  if(u.son){
+    if(u.son.tipo==='dormiu'){if(tS<=720){rotS='Dormindo';valS=dur(tS);subS='desde '+hhmm(u.son.em);clsS=' dorme'}}
+    else{rotS='Acordado';valS=dur(tS);subS='desde '+hhmm(u.son.em);medS=med(tS,f.wake[0],f.wake[1])}
+  }
+  return '<div class="relogios">'+
+    '<div class="rel"><span class="rot">Mamada</span><span class="val">'+dur(tM)+'</span><span class="sub">'+(u.mam?'às '+hhmm(u.mam.em)+(lado?' · '+lado:''):'Sem registro')+'</span>'+med(tM,f.feed[0],f.feed[1])+'</div>'+
+    '<div class="rel'+clsS+'"><span class="rot">'+rotS+'</span><span class="val">'+valS+'</span><span class="sub">'+subS+'</span>'+medS+'</div>'+
+    '<div class="rel"><span class="rot">Fralda</span><span class="val">'+dur(tF)+'</span><span class="sub">'+(u.fr?'às '+hhmm(u.fr.em)+(frd?' · '+frd:''):'Sem registro')+'</span>'+med(tF,120,180)+'</div>'+
+  '</div>';
+}
+function htmlCausa(c,top,max){
+  const C=CAUSAS[c.k],ab=S.aberto===c.k;
+  const pct=Math.max(4,Math.round(c.p/max*100));
+  const chips=c.mot.map(m=>'<span class="motivo">'+esc(m)+'</span>').join('')+(c.tent?'<span class="motivo tent">Tentado</span>':'');
+  return '<div class="causa'+(top?' top':'')+'">'+
+    '<button type="button" class="causa-info" data-a="abrir" data-k="'+c.k+'" aria-expanded="'+ab+'">'+
+      '<span class="causa-nome">'+C.nome+'</span>'+
+      '<span class="barra" aria-hidden="true"><i style="width:'+pct+'%"></i></span>'+
+      ((top||ab)?'<span class="causa-acao">'+C.acao+'</span>':'')+
+      (chips?'<span class="motivos">'+chips+'</span>':'')+
+    '</button>'+
+    '<button type="button" class="btn-res" data-a="resolver" data-k="'+c.k+'">Resolveu</button>'+
+    (ab?'<ul class="sinais">'+C.sinais.map(s=>'<li>'+s+'</li>').join('')+'</ul>':'')+
+  '</div>';
+}
+function htmlChoro(ch,now){
+  const ctx=contexto(now),r=pontuar(ctx,semanas(now),ch,now);
+  const max=r.lista[0].p,durMin=(now-ch.em)/MIN;
+  const selos='<span class="selo'+(r.conf==='forte'?' forte':'')+'">Palpite '+r.conf+'</span>'+
+    (r.pess.alpha>=.1?'<span class="selo hist">Aprendido · '+r.pess.n+'</span>':'');
+  return '<section class="choro" aria-label="Choro em andamento">'+
+    '<div class="choro-topo"><div><div class="rot">Chorando há</div><div class="timer" data-desde="'+ch.em+'">'+relogio(now-ch.em)+'</div></div><div class="selos">'+selos+'</div></div>'+
+    (ch.ac?'<div class="ouvi">'+AN.chipsAc(ch.ac).map(t=>'<span>'+esc(t)+'</span>').join('')+'</div>':'')+
+    ((r.ac&&r.ac.dor)?'<a class="aviso" href="#alerta">Choro muito agudo e forte · Sinais de alerta</a>':'')+
+    (durMin>=120?'<a class="aviso" href="#alerta">Mais de 2 h de choro · Sinais de alerta</a>':'')+
+    '<div class="causas">'+r.lista.map((c,i)=>htmlCausa(c,i===0,max)).join('')+'</div>'+
+    '<div class="choro-acoes">'+
+      '<button type="button" class="btn-sec" data-a="ouvir">'+IC.mic+'Ouvir de novo</button>'+
+      '<button type="button" class="btn-sec" data-a="sozinho">Parou sozinho</button>'+
+      '<a class="btn-sec btn-alerta" href="#alerta">Sinais de alerta</a>'+
+      '<button type="button" class="btn-sec" data-a="cancelar-choro">Cancelar</button>'+
+    '</div>'+
+  '</section>';
+}
+function htmlAgora(){
+  const now=Date.now(),p=S.perfil;
+  let h='';
+  if(!nascimentoMs()){
+    h+='<form class="form setup" data-form="rapido">'+
+      '<div class="campos2">'+
+        '<div class="campo"><label for="r-nome">Nome do bebê</label><input id="r-nome" name="nome" autocomplete="off" value="'+esc(p.nome||'')+'"></div>'+
+        '<div class="campo"><label for="r-nasc">Nascimento</label><input id="r-nasc" name="nascimento" type="date" value="'+esc(p.nascimento||'')+'"></div>'+
+      '</div>'+
+      '<button class="btn-pri" type="submit">Salvar</button>'+
+    '</form>';
+  }
+  h+=htmlRelogios(now);
+  const ch=choroAtivo(now);
+  if(S.fase==='ouvindo'){
+    h+='<section class="ouvindo" aria-live="polite"><div class="rot">Ouvindo</div><div class="cont" id="cont">'+Math.max(0,Math.ceil((OUVIR_MS-(performance.now()-A.t0))/1000))+'</div>'+
+       '<canvas id="nivel" aria-hidden="true"></canvas>'+
+       '<button type="button" class="btn-sec" data-a="parar">Parar</button></section>';
+  } else if(ch){
+    h+=htmlChoro(ch,now);
+  } else if(S.fase==='naoouvi'||S.fase==='erro'){
+    h+='<section class="msg"><strong>'+esc(S.msg)+'</strong><div class="linha-btn">'+
+       '<button type="button" class="btn-pri" data-a="ouvir">Ouvir de novo</button>'+
+       '<button type="button" class="btn-sec" data-a="semouvir">Seguir sem ouvir</button></div></section>';
+  } else {
+    h+='<button type="button" class="btn-ouvir" data-a="ouvir">'+IC.mic+'Ouvir o choro</button>'+
+       '<button type="button" class="sem-ouvir" data-a="semouvir">Está chorando, sem ouvir</button>';
+  }
+  const dorme=contexto(now).dormindo;
+  h+='<div class="registro">'+
+    '<button type="button" class="btn-reg" data-a="log" data-t="mamada">'+IC.mamada+'<span>Mamou</span></button>'+
+    '<button type="button" class="btn-reg" data-a="log" data-t="sono">'+(dorme?IC.sol:IC.lua)+'<span>'+(dorme?'Acordou':'Dormiu')+'</span></button>'+
+    '<button type="button" class="btn-reg" data-a="log" data-t="fralda">'+IC.fralda+'<span>Fralda</span></button>'+
+  '</div>';
+  return h;
+}
+function mapaSono(){
+  const asc=S.eventos.filter(e=>e.tipo==='dormiu'||e.tipo==='acordou').sort((a,b)=>a.em-b.em);
+  const mp={};
+  for(let i=1;i<asc.length;i++) if(asc[i].tipo==='acordou'&&asc[i-1].tipo==='dormiu') mp[asc[i].id]=(asc[i].em-asc[i-1].em)/MIN;
+  return {asc,mp};
+}
+function sonoNoDia(asc,ini,fim,now){
+  let tot=0;
+  for(let i=0;i<asc.length;i++){
+    const e=asc[i]; if(e.tipo!=='dormiu') continue;
+    const prox=asc[i+1]; let fimS;
+    if(prox){if(prox.tipo!=='acordou') continue;fimS=prox.em}
+    else fimS=Math.min(now,e.em+12*HORA);
+    const a=Math.max(e.em,ini),b=Math.min(fimS,fim);
+    if(b>a) tot+=b-a;
+  }
+  return tot/MIN;
+}
+function rotuloEvento(e,mp,now){
+  switch(e.tipo){
+    case 'mamada': return 'Mamou'+(e.det&&DET_LONGO.mamada[e.det]?' · '+DET_LONGO.mamada[e.det]:'');
+    case 'dormiu': return 'Dormiu';
+    case 'acordou': return 'Acordou'+(mp[e.id]!=null?' · dormiu '+dur(mp[e.id]):'');
+    case 'fralda': return 'Fralda'+(e.det&&DET_LONGO.fralda[e.det]?' · '+DET_LONGO.fralda[e.det]:'');
+    case 'choro':{
+      let s='Choro';
+      if(e.fim) s+=' · '+dur((e.fim-e.em)/MIN); else if(now-e.em<3*HORA) s+=' · agora';
+      if(e.resolveu) s+=' · '+nomeRes(e.resolveu);
+      return s;
+    }
+  }
+  return esc(e.tipo);
+}
+function htmlPadroes(now){
+  const chs=S.eventos.filter(e=>e.tipo==='choro'&&now-e.em<30*DIA);
+  if(!chs.length) return '';
+  const cont={};
+  chs.forEach(e=>{if(e.resolveu&&(CAUSAS[e.resolveu]||FINAIS[e.resolveu])) cont[e.resolveu]=(cont[e.resolveu]||0)+1});
+  const linhas=Object.entries(cont).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(1,...linhas.map(x=>x[1]));
+  const horas=Array(24).fill(0); chs.forEach(e=>horas[new Date(e.em).getHours()]++);
+  const hm=Math.max(1,...horas);
+  return '<h2>Últimos 30 dias</h2><div class="pad">'+
+    (linhas.length?'<div><div class="sub-t">O que resolveu</div><div class="bls">'+linhas.map(([k,n])=>
+      '<div class="bl"><span>'+nomeRes(k)+'</span><span class="barra" aria-hidden="true"><i style="width:'+Math.round(n/max*100)+'%"></i></span><b>'+n+'</b></div>').join('')+'</div></div>':'')+
+    '<div><div class="sub-t">Horário dos choros</div><div class="h-grid" role="img" aria-label="Choros por hora do dia">'+
+      horas.map((n,h)=>'<span title="'+h+'h · '+n+'"><i style="opacity:'+(n?(.25+.75*n/hm).toFixed(2):0)+'"></i></span>').join('')+'</div>'+
+      '<div class="h-eixo"><span style="left:0">0h</span><span style="left:25%">6h</span><span style="left:50%">12h</span><span style="left:75%">18h</span><span style="left:100%">24h</span></div></div>'+
+  '</div>';
+}
+function htmlDia(){
+  const now=Date.now(),ini=diaRef(S.diaOff),fim=fimDia(ini);
+  const evs=S.eventos.filter(e=>e.em>=ini&&e.em<fim);
+  const titulo=S.diaOff===0?'Hoje':S.diaOff===-1?'Ontem':new Date(ini).toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+  const mam=evs.filter(e=>e.tipo==='mamada').length;
+  const frs=evs.filter(e=>e.tipo==='fralda');
+  const xixi=frs.filter(e=>e.det==='xixi'||e.det==='ambos').length,coco=frs.filter(e=>e.det==='coco'||e.det==='ambos').length;
+  const {asc,mp}=mapaSono();
+  const sono=sonoNoDia(asc,ini,fim,now);
+  const choros=evs.filter(e=>e.tipo==='choro').length;
+  let h='<div class="dia-nav"><button type="button" data-a="dia" data-d="-1" aria-label="Dia anterior">‹</button><strong>'+esc(titulo)+'</strong><button type="button" data-a="dia" data-d="1" aria-label="Próximo dia"'+(S.diaOff>=0?' disabled':'')+'>›</button></div>';
+  h+='<div class="resumo">'+
+    '<div><b>'+mam+'</b><span>Mamadas</span></div>'+
+    '<div><b>'+frs.length+'</b><span>Fraldas</span>'+((xixi||coco)?'<small>'+xixi+' xixi · '+coco+' cocô</small>':'')+'</div>'+
+    '<div><b>'+(sono>0?dur(sono):'—')+'</b><span>Sono</span></div>'+
+    '<div><b>'+choros+'</b><span>Choros</span></div>'+
+  '</div>';
+  h+='<h2>Registros</h2>';
+  if(!evs.length) h+='<div class="vazio-txt">Nada registrado</div>';
+  else{
+    h+='<ol class="linhas">'+evs.map(e=>{
+      const conf=S.confirmar===e.id;
+      return '<li class="linha">'+
+        '<input class="hora" type="time" data-hora="'+e.id+'" value="'+hhmm(e.em)+'" aria-label="Horário">'+
+        '<span class="ponto t-'+esc(e.tipo)+'" aria-hidden="true"></span>'+
+        '<span class="txt">'+rotuloEvento(e,mp,now)+'</span>'+
+        (conf?'<span class="conf"><button type="button" class="sim" data-a="del-sim" data-id="'+e.id+'">Excluir</button><button type="button" class="nao" data-a="del-nao">Não</button></span>'
+             :'<button type="button" class="x" data-a="del" data-id="'+e.id+'" aria-label="Excluir">×</button>')+
+      '</li>';
+    }).join('')+'</ol>';
+  }
+  h+=htmlPadroes(now);
+  return h;
+}
+function htmlAlerta(){
+  const p=S.perfil;
+  const lista=(arr,cls)=>'<ul class="flags'+(cls?' '+cls:'')+'">'+arr.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+  const tel=v=>String(v).replace(/[^\d+]/g,'');
+  return '<h2 class="urg" style="margin-top:4px">Pronto-socorro agora</h2>'+lista(URG,'urg')+
+    '<h2>Ligue para o pediatra</h2>'+lista(PED)+
+    '<h2>Telefones</h2><div class="fones">'+
+      '<a class="fone" href="tel:192"><span class="fone-n">SAMU</span><span class="num">192</span></a>'+
+      (p.fone
+        ?'<a class="fone" href="tel:'+esc(tel(p.fone))+'"><span class="fone-n">'+esc(p.pediatra||'Pediatra')+'</span><span class="num">'+esc(p.fone)+'</span></a>'
+        :'<a class="fone" href="#bebe"><span class="fone-n">Pediatra</span><span class="link">Cadastrar</span></a>')+
+      '<a class="fone" href="tel:188"><span class="fone-n">Apoio emocional · CVV</span><span class="num">188</span></a>'+
+    '</div>'+
+    '<h2>No limite</h2>'+lista(LIMITE,'calma');
+}
+function htmlBebe(){
+  const p=S.perfil;
+  return '<form class="form" data-form="perfil">'+
+      '<div class="campo"><label for="b-nome">Nome</label><input id="b-nome" name="nome" autocomplete="off" value="'+esc(p.nome||'')+'"></div>'+
+      '<div class="campo"><label for="b-nasc">Nascimento</label><input id="b-nasc" name="nascimento" type="date" value="'+esc(p.nascimento||'')+'"></div>'+
+      '<div class="campo"><label for="b-ped">Pediatra</label><input id="b-ped" name="pediatra" autocomplete="off" value="'+esc(p.pediatra||'')+'"></div>'+
+      '<div class="campo"><label for="b-fone">Telefone do pediatra</label><input id="b-fone" name="fone" type="tel" inputmode="tel" autocomplete="off" value="'+esc(p.fone||'')+'"></div>'+
+      '<button class="btn-pri" type="submit">Salvar</button>'+
+    '</form>'+
+    '<div class="info"><span>Registros</span><b>'+S.eventos.length+'</b></div>'+
+    '<div class="info"><span>Choros aprendidos</span><b>'+S.eventos.filter(e=>e.tipo==='choro'&&CAUSAS[e.resolveu]).length+'</b></div>';
+}
+
+/* rotas e eventos */
+function rota(){
+  const h=location.hash.replace('#','');
+  const v=VIEWS.includes(h)?h:'agora';
+  if(v!=='agora'&&S.fase==='ouvindo') terminarOuvir(true);
+  if(v!==S.view){S.confirmar=null;S.aberto=null;window.scrollTo(0,0)}
+  S.view=v;
+  if(v==='bebe') S.perfilSujo=false;
+  VIEWS.forEach(x=>{document.getElementById('v-'+x).hidden=x!==v});
+  renderView(v); renderNav();
+}
+window.addEventListener('hashchange',rota);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.fase==='ouvindo') terminarOuvir(true)});
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); if(!b||b.disabled) return;
+  const a=b.dataset.a;
+  if(a==='ouvir') ouvir();
+  else if(a==='parar') terminarOuvir(false);
+  else if(a==='semouvir'){S.fase='pronto';registrarChoro(null)}
+  else if(a==='resolver') resolver(b.dataset.k);
+  else if(a==='sozinho') resolver('sozinho');
+  else if(a==='cancelar-choro') cancelarChoro();
+  else if(a==='abrir'){S.aberto=S.aberto===b.dataset.k?null:b.dataset.k;renderView('agora')}
+  else if(a==='log') registrar(b.dataset.t);
+  else if(a==='det') definirDet(b.dataset.id,b.dataset.v);
+  else if(a==='desfazer'){const t=S.toast;fecharToast();if(t&&t.undo) t.undo()}
+  else if(a==='del'){S.confirmar=b.dataset.id;renderView('dia')}
+  else if(a==='del-sim'){const id=b.dataset.id;S.confirmar=null;excluir(id)}
+  else if(a==='del-nao'){S.confirmar=null;renderView('dia')}
+  else if(a==='dia'){S.diaOff=Math.min(0,S.diaOff+(+b.dataset.d));S.confirmar=null;renderView('dia')}
+});
+document.addEventListener('submit',e=>{
+  const f=e.target; if(!f.dataset||!f.dataset.form) return;
+  e.preventDefault();
+  if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
+  const p={}; new FormData(f).forEach((v,k)=>{p[k]=String(v).trim()});
+  if(p.nascimento&&!/^\d{4}-\d{2}-\d{2}$/.test(p.nascimento)) delete p.nascimento;
+  S.perfilSujo=false;
+  salvarPerfil(p);
+  mostrarToast({msg:'Salvo'});
+});
+document.addEventListener('input',e=>{if(e.target.closest&&e.target.closest('[data-form="perfil"]')) S.perfilSujo=true});
+document.addEventListener('change',e=>{
+  const t=e.target; if(!t.dataset||!t.dataset.hora) return;
+  const ev=S.eventos.find(x=>x.id===t.dataset.hora);
+  if(!ev||!/^\d{2}:\d{2}$/.test(t.value)) return;
+  const [hh,mm]=t.value.split(':').map(Number);
+  const d=new Date(ev.em); d.setHours(hh,mm,0,0);
+  const em=d.getTime(); if(em===ev.em) return;
+  const patch={em}; if(ev.tipo==='choro'&&ev.fim) patch.fim=ev.fim+(em-ev.em);
+  atualizar(ev.id,patch);
+});
+document.addEventListener('focusout',e=>{
+  if(!e.target.matches||!e.target.matches('input')) return;
+  setTimeout(()=>{if(S.pend){S.pend=false;renderView(S.view)}},350);
+});
+
+function tique(){
+  const now=Date.now();
+  document.querySelectorAll('[data-desde]').forEach(el=>{el.textContent=relogio(now-(+el.dataset.desde))});
+  if(++seg%30===0&&S.fase!=='ouvindo'){renderTopo();if(S.view!=='bebe') renderView(S.view)}
+}
+
+S.eventos=lsGet(LS_EV,[]); if(!Array.isArray(S.eventos)) S.eventos=[];
+S.perfil=lsGet(LS_PF,{}); if(!S.perfil||typeof S.perfil!=='object') S.perfil={};
+ordenar(); rota(); renderAll();
+setInterval(tique,1000);
+})();
+</script>
+</body>
+</html>
